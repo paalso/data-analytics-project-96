@@ -5,7 +5,9 @@
 
 #### [Level 2 project: Online school / Проект 2: Онлайн-школа](https://ru.hexlet.io/programs/data-analytics/projects/962)
 
-###### Some useful links
+##### Some useful links
 [DBeaver - a tool for working with databases](https://dbeaver.io/download/)
+
 [Instructions on how to connect to the database](https://dbeaver.com/docs/wiki/Create-Connection/)
+
 [Service to check request formatting](https://online.sqlfluff.com/)
