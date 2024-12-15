@@ -21,6 +21,7 @@ WITH ranked_sessions AS (
 )
 SELECT
     visitor_id,
+    visit_date,
     utm_source,
     utm_medium,
     utm_campaign,
@@ -28,8 +29,7 @@ SELECT
     created_at,
     amount,
     closing_reason,
-    status_id,
-    visit_date
+    status_id
 FROM ranked_sessions
 WHERE row_num = 1
 ORDER BY amount DESC NULLS LAST, visit_date, utm_source, utm_medium, utm_campaign;
