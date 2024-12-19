@@ -10,9 +10,19 @@ b8a9c619973434b33109be9a126ab60ebd640516|2023-06-14 16:09:36.593|https://foobar.
 eb8f4489420ea02653f97b03e602320e7e76386c|2023-06-14 17:31:19.250|https://foobar.com/ba19197344427eddba85eb191ca8bd0f2871fb7e|bing.com|organic|        |       |
 
 
+SELECT COUNT(*) FROM sessions
+LIMIT 5;
 count |
 ------+
 233342|
+
+
+SELECT COUNT(distinct(visitor_id)) FROM sessions
+LIMIT 5;
+count |
+------+
+169140|
+
 
 
 source                                            |
@@ -50,6 +60,19 @@ rsy_msc.segment_keys.nabor_060623                       |
 129852                                                  |
 hr.post                                                 |
 ...........
+
+SELECT DISTINCT medium FROM sessions;
+medium |
+-------+
+tg     | +
+youtube| +
+organic|
+cpm    | +
+cpc    | +
+social | +
+cpp    | +
+cpa    | +
+
 
 -- =================================================================================================================================================
 
@@ -103,6 +126,14 @@ status_id|
 
 
 -- =================================================================================================================================================
+
+SELECT
+    DATE(campaign_date),
+    SUM(daily_spent) 
+FROM vk_ads
+GROUP BY DATE(campaign_date);
+ORDER BY campaign_date;
+
 
 SELECT * FROM vk_ads
 LIMIT 5;
@@ -185,3 +216,15 @@ ad_id                                   |campaign_id                            
 8155246d768e0f6592d3f03b69f277c69be54842|b47a3f1436ece217553332a7ca2aeb8c23a2ff16|Professions / Retarget (smartbanner)|yandex    |cpc       |prof-professions-retarget|rsy_ru.segment_smartbanner|2023-06-19 00:00:00.000|        392|
 8155246d768e0f6592d3f03b69f277c69be54842|b47a3f1436ece217553332a7ca2aeb8c23a2ff16|Professions / Retarget (smartbanner)|yandex    |cpc       |prof-professions-retarget|rsy_ru.segment_smartbanner|2023-06-11 00:00:00.000|        815|
 8155246d768e0f6592d3f03b69f277c69be54842|b47a3f1436ece217553332a7ca2aeb8c23a2ff16|Professions / Retarget (smartbanner)|yandex    |cpc       |prof-professions-retarget|rsy_ru.segment_smartbanner|2023-06-05 00:00:00.000|        730|
+
+
+
+SELECT
+    DATE(campaign_date),
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    SUM(daily_spent) 
+FROM ya_ads
+GROUP BY DATE(campaign_date), utm_source, utm_medium utm_campaign
+ORDER BY DATE(campaign_date), utm_source, utm_medium utm_campaign;
