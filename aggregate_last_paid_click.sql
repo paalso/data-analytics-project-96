@@ -1,25 +1,41 @@
+-- Рассчитывает ключевые метрики по рекламным кампаниям в разрезе
+-- дат, источников, типов трафика и кампаний:  
+-- - Уникальные посетители (visitors_count)  
+-- - Затраты на рекламу (total_cost)  
+-- - Лиды (leads_count)  
+-- - Успешные сделки (purchases_count)  
+-- - Доход (revenue)  
+-- Используется модель Last Paid Click — метрики привязываются к последней
+-- сессии перед регистрацией.  
+-- Данные о расходах объединяются из источников `vk_ads` и `ya_ads`.  
 WITH
-vk_costs AS (
+combined_ad_costs AS (
     SELECT
         utm_source,
         utm_medium,
         utm_campaign,
-        DATE(campaign_date) AS campaign_date,
-        SUM(daily_spent) AS sum
-    FROM vk_ads
+        campaign_date,
+        SUM(daily_spent) AS total_cost
+    FROM (
+        SELECT
+            utm_source,
+            utm_medium,
+            utm_campaign,
+            DATE(campaign_date) AS campaign_date,
+            daily_spent
+        FROM vk_ads
+        UNION ALL
+        SELECT
+            utm_source,
+            utm_medium,
+            utm_campaign,
+            DATE(campaign_date) AS campaign_date,
+            daily_spent
+        FROM ya_ads
+    ) AS all_ads
     GROUP BY DATE(campaign_date), utm_source, utm_medium, utm_campaign
 ),
-ya_costs AS (
-    SELECT
-        utm_source,
-        utm_medium,
-        utm_campaign,
-        DATE(campaign_date) AS campaign_date,
-        SUM(daily_spent) AS sum
-    FROM ya_ads
-    GROUP BY DATE(campaign_date), utm_source, utm_medium, utm_campaign
-),
-tab AS (
+visitor_session_data AS (
     SELECT
         s.visit_date AS original_date,
         s.visitor_id,
@@ -32,7 +48,7 @@ tab AS (
         l.created_at,
         l.status_id,
         DATE(s.visit_date) AS visit_date,
-        COALESCE(vk_costs.sum, 0) + COALESCE(ya_costs.sum, 0) AS total_cost,
+        combined_ad_costs.total_cost AS total_cost,
         ROW_NUMBER()
             OVER (
                 PARTITION BY s.visitor_id
@@ -42,18 +58,12 @@ tab AS (
     FROM sessions AS s
     LEFT JOIN leads AS l
         ON s.visitor_id = l.visitor_id AND s.visit_date <= l.created_at
-    LEFT JOIN vk_costs
+    LEFT JOIN combined_ad_costs
         ON
-            DATE(s.visit_date) = DATE(vk_costs.campaign_date)
-            AND s.source = vk_costs.utm_source
-            AND s.medium = vk_costs.utm_medium
-            AND s.campaign = vk_costs.utm_campaign
-    LEFT JOIN ya_costs
-        ON
-            DATE(s.visit_date) = DATE(ya_costs.campaign_date)
-            AND s.source = ya_costs.utm_source
-            AND s.medium = ya_costs.utm_medium
-            AND s.campaign = ya_costs.utm_campaign
+            DATE(s.visit_date) = DATE(combined_ad_costs.campaign_date)
+            AND s.source = combined_ad_costs.utm_source
+            AND s.medium = combined_ad_costs.utm_medium
+            AND s.campaign = combined_ad_costs.utm_campaign
     WHERE s.medium != 'organic'
 )
 SELECT
@@ -71,7 +81,7 @@ SELECT
         0
     ) AS purchases_count,
     NULLIF(SUM(amount), 0) AS revenue
-FROM tab
+FROM visitor_session_data
 WHERE rn = 1
 GROUP BY
     visit_date,
