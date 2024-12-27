@@ -68,10 +68,10 @@ visitor_session_data AS (
 )
 SELECT
     visit_date,
+    COUNT(DISTINCT visitor_id) AS visitors_count,
     utm_source,
     utm_medium,
     utm_campaign,
-    COUNT(DISTINCT visitor_id) AS visitors_count,
     NULLIF(MIN(total_cost), 0) AS total_cost,
     NULLIF(COUNT(DISTINCT lead_id), 0) AS leads_count,
     NULLIF(
