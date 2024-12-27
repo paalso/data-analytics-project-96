@@ -41,4 +41,8 @@ SELECT
 FROM ranked_sessions
 WHERE row_num = 1
 ORDER BY
-    amount DESC NULLS LAST, visit_date ASC, utm_source ASC, utm_medium ASC, utm_campaign ASC;
+    amount DESC NULLS LAST,
+    visit_date ASC,
+    utm_source ASC,
+    utm_medium ASC,
+    utm_campaign ASC;
