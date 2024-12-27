@@ -51,10 +51,10 @@ visitor_session_data AS (
         combined_ad_costs.total_cost,
         DATE(s.visit_date) AS visit_date,
         ROW_NUMBER()
-            OVER (
-                PARTITION BY s.visitor_id
-                ORDER BY s.visit_date DESC
-            )
+        OVER (
+            PARTITION BY s.visitor_id
+            ORDER BY s.visit_date DESC
+        )
         AS rn
     FROM sessions AS s
     LEFT JOIN leads AS l
