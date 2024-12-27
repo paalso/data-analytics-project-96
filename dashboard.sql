@@ -1013,7 +1013,6 @@ ORDER BY
 
 
 -- Анализ эффективности маркетинга разрезе utm_campaign
--- Анализ эффективности маркетинга по vk в разрезе utm_campaign
 WITH
 combined_ad_costs AS (
     SELECT

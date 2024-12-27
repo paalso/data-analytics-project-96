@@ -35,6 +35,7 @@ combined_ad_costs AS (
     ) AS all_ads
     GROUP BY DATE(campaign_date), utm_source, utm_medium, utm_campaign
 ),
+
 visitor_session_data AS (
     SELECT
         s.visit_date AS original_date,
@@ -47,8 +48,8 @@ visitor_session_data AS (
         l.closing_reason,
         l.created_at,
         l.status_id,
+        combined_ad_costs.total_cost,
         DATE(s.visit_date) AS visit_date,
-        combined_ad_costs.total_cost AS total_cost,
         ROW_NUMBER()
             OVER (
                 PARTITION BY s.visitor_id
@@ -66,12 +67,13 @@ visitor_session_data AS (
             AND s.campaign = combined_ad_costs.utm_campaign
     WHERE s.medium != 'organic'
 )
+
 SELECT
     visit_date,
-    COUNT(DISTINCT visitor_id) AS visitors_count,
     utm_source,
     utm_medium,
     utm_campaign,
+    COUNT(DISTINCT visitor_id) AS visitors_count,
     NULLIF(MIN(total_cost), 0) AS total_cost,
     NULLIF(COUNT(DISTINCT lead_id), 0) AS leads_count,
     NULLIF(
